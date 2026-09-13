@@ -6,9 +6,27 @@
 
 ## 这是什么
 
-页面加载时从开放电台数据库 [Radio-Browser.info](https://www.radio-browser.info/)
-拉取中国的全部电台，在前端按民族语言关键词筛选、去重、剔除无效源，然后以毛玻璃卡片
-网格呈现。点击任意卡片，底部悬浮播放器立刻加载并播放该电台的直播流。
+把 [Radio-Browser.info](https://www.radio-browser.info/) 开放数据库里的中国电台，按民族语言
+筛选、去重、剔除无效源后，以毛玻璃卡片网格呈现。点击任意卡片，底部悬浮播放器立刻加载
+并播放该电台的直播流。
+
+### 数据是怎么到页面上的（重要）
+
+Radio-Browser 的三个镜像全在**欧洲**（德/荷/奥）。若让浏览器每次打开都现场跨海拉 2.5MB
+全量数据，会频繁超时 —— 页面就只剩骨架屏（俗称「六个空框」）。所以数据在**构建期烤好**：
+
+```
+radio-browser API ──[build-data.js]──> stations.json ──[随站点一起部署]──> 浏览器
+     (2.5MB 全量)      (同款筛选规则)      (62KB 成品)        (同域读取, 毫秒级)
+```
+
+- **首选**：读同域 `stations.json` —— 走 CDN 边缘，必然可达，亚洲延迟 ~0.3s
+- **兜底**：万一静态文件取不到，才退回实时拉取（三镜像轮询）
+- **后台补齐**：页面渲染后静默拉一次在线数据，把新增电台合并进来；失败就算了，不影响页面
+- 所有网络请求都带**超时**（镜像 15s / 静态数据 12s），并有 12s 全局兜底提示 + 重新加载按钮
+
+分类规则只写在 `index.html` 一处，`build-data.js` 在构建时**直接从 HTML 里抽取**（正则切出
+`LANGS` / `REGIONS` / `BLOCK_NAME`），因此脚本和页面的筛选逻辑永不漂移。
 
 ## 语言覆盖
 
@@ -50,15 +68,28 @@
 | 文件 | 作用 |
 |---|---|
 | `index.html` | 整个应用（结构 + 样式 + 逻辑） |
+| `stations.json` | **烤好的电台数据**（205 台 / 62KB），页面首选数据源 |
+| `build-data.js` | 构建脚本：拉取全量数据 → 按页面同款规则筛选 → 写 `stations.json` |
 | `hls.min.js` | hls.js 本地副本；加载失败自动回退 CDN |
 | `wrangler.toml` | Cloudflare Pages 项目配置 |
+
+## 更新数据
+
+电台有增减时（建议每 1–2 个月，或发现死链时）重新烤一次：
+
+```bash
+node build-data.js          # 从线上拉取最新数据
+node build-data.js --from-cache   # 用本地 /tmp/cn2.json 缓存（离线调试用）
+```
+
+脚本会打印各分类数量，确认无误后提交并部署即可。
 
 ## 部署
 
 Cloudflare Pages，零构建直接发布本目录：
 
 ```bash
-npx wrangler pages deploy . --project-name ethnic-radio
+npx wrangler pages deploy . --project-name ethnic-radio --branch main --commit-dirty=true
 ```
 
 ## 本地预览
@@ -67,6 +98,8 @@ npx wrangler pages deploy . --project-name ethnic-radio
 python3 -m http.server 4180
 # 打开 http://127.0.0.1:4180/
 ```
+
+> 本地预览必须用 HTTP 服务，直接 `file://` 打开会因浏览器安全策略无法读取 `stations.json`。
 
 ## 其他
 
