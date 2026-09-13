@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#120c1f">
+<title>华韵集 - 中国少数民族广播电台</title>
+<meta name="description" content="华韵集：聚合中国各民族语言广播电台，维吾尔语、藏语、蒙古语、朝鲜语、哈萨克语、柯尔克孜语、彝语、傣语等，点击即播。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%93%BB%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+<style>
+  :root{
+    --bg-0:#0d0917;
+    --bg-1:#150f26;
+    --glass:rgba(255,255,255,.07);
+    --glass-strong:rgba(255,255,255,.11);
+    --stroke:rgba(255,255,255,.14);
+    --stroke-soft:rgba(255,255,255,.08);
+    --txt:#f4f1ea;
+    --txt-dim:#a99fc0;
+    --gold:#e0b973;
+    --rose:#d96a7a;
+    --teal:#59c3b8;
+    --violet:#8f7ce0;
+    --danger:#ff6b6b;
+    --shadow:0 18px 48px rgba(0,0,0,.45);
+    --bar-h:92px;
+  }
+
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0}
+  body{
+    min-height:100vh;
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    color:var(--txt);
+    background:var(--bg-0);
+    padding-bottom:calc(var(--bar-h) + 28px);
+    overflow-x:hidden;
+  }
+  /* 民族色彩背景：暗色渐变 + 光斑 + 织锦纹样 */
+  body::before{
+    content:"";position:fixed;inset:0;z-index:-2;
+    background:
+      radial-gradient(1100px 620px at 12% -8%, rgba(143,124,224,.34), transparent 62%),
+      radial-gradient(900px 560px at 92% 4%, rgba(217,106,122,.26), transparent 60%),
+      radial-gradient(760px 520px at 78% 96%, rgba(89,195,184,.20), transparent 62%),
+      radial-gradient(680px 460px at 8% 88%, rgba(224,185,115,.18), transparent 60%),
+      linear-gradient(160deg,var(--bg-1) 0%,var(--bg-0) 52%,#0a0710 100%);
+  }
+  body::after{
+    content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120' viewBox='0 0 120 120'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='0.05' stroke-width='1'%3E%3Cpath d='M60 6 L74 20 L60 34 L46 20 Z'/%3E%3Cpath d='M60 46 L78 64 L60 82 L42 64 Z'/%3E%3Cpath d='M20 60 L34 74 L20 88 L6 74 Z'/%3E%3Cpath d='M100 60 L114 74 L100 88 L86 74 Z'/%3E%3Ccircle cx='60' cy='64' r='5'/%3E%3C/g%3E%3C/svg%3E");
+    background-size:180px 180px;
+  }
+
+  /* ---------- 顶部导航 ---------- */
+  .nav{
+    position:sticky;top:0;z-index:60;
+    background:rgba(13,9,23,.62);
+    backdrop-filter:blur(18px) saturate(150%);
+    -webkit-backdrop-filter:blur(18px) saturate(150%);
+    border-bottom:1px solid var(--stroke-soft);
+  }
+  .nav-inner{
+    max-width:1520px;margin:0 auto;padding:14px 20px;
+    display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:12px;min-width:0}
+  .brand-mark{
+    width:44px;height:44px;flex:0 0 44px;border-radius:14px;
+    display:grid;place-items:center;font-size:20px;color:#1a1226;
+    background:linear-gradient(135deg,var(--gold),var(--rose) 55%,var(--violet));
+    box-shadow:0 8px 22px rgba(224,185,115,.28);
+  }
+  .brand-txt{min-width:0}
+  .brand-title{font-size:19px;font-weight:700;letter-spacing:.6px;line-height:1.2;white-space:nowrap}
+  .brand-title small{font-weight:400;color:var(--txt-dim);font-size:12px;letter-spacing:.4px;display:block;margin-top:2px;white-space:normal}
+  .nav-spacer{flex:1 1 auto}
+  .search{
+    position:relative;flex:0 1 300px;min-width:190px;
+  }
+  .search i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--txt-dim);font-size:13px}
+  .search input{
+    width:100%;padding:11px 14px 11px 38px;border-radius:12px;
+    border:1px solid var(--stroke);background:var(--glass);color:var(--txt);
+    font-size:14px;outline:none;transition:.2s;
+  }
+  .search input::placeholder{color:#8b81a3}
+  .search input:focus{border-color:rgba(224,185,115,.6);background:var(--glass-strong);box-shadow:0 0 0 3px rgba(224,185,115,.13)}
+  .stat-pill{
+    display:flex;align-items:center;gap:8px;padding:9px 14px;border-radius:12px;
+    background:var(--glass);border:1px solid var(--stroke);font-size:13px;color:var(--txt-dim);white-space:nowrap;
+  }
+  .stat-pill b{color:var(--gold);font-weight:700}
+
+  /* ---------- 语言筛选 chips ---------- */
+  .chips{
+    max-width:1520px;margin:0 auto;padding:14px 20px 4px;
+    display:flex;gap:9px;flex-wrap:wrap;align-items:center;
+  }
+  .chip{
+    padding:7px 14px;border-radius:999px;cursor:pointer;font-size:13px;
+    background:var(--glass);border:1px solid var(--stroke);color:var(--txt-dim);
+    transition:.18s;user-select:none;white-space:nowrap;
+  }
+  .chip:hover{color:var(--txt);border-color:rgba(255,255,255,.28);transform:translateY(-1px)}
+  .chip.on{
+    color:#1a1226;font-weight:600;border-color:transparent;
+    background:linear-gradient(135deg,var(--gold),var(--rose));
+    box-shadow:0 6px 18px rgba(224,185,115,.26);
+  }
+  .chip .n{opacity:.65;font-size:11px;margin-left:5px}
+
+  /* ---------- 主体 ---------- */
+  main{max-width:1520px;margin:0 auto;padding:18px 20px 40px}
+  .grid{
+    display:grid;gap:16px;grid-template-columns:1fr;
+  }
+  @media(min-width:620px){.grid{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:1000px){.grid{grid-template-columns:repeat(3,1fr)}}
+  @media(min-width:1420px){.grid{grid-template-columns:repeat(4,1fr)}}
+
+  .card{
+    position:relative;display:flex;flex-direction:column;gap:12px;
+    padding:18px;border-radius:18px;overflow:hidden;
+    background:var(--glass);border:1px solid var(--stroke);
+    backdrop-filter:blur(14px) saturate(140%);
+    -webkit-backdrop-filter:blur(14px) saturate(140%);
+    box-shadow:var(--shadow);
+    transition:transform .2s,border-color .2s,background .2s;
+  }
+  .card::before{
+    content:"";position:absolute;inset:0;opacity:.5;pointer-events:none;
+    background:linear-gradient(140deg,rgba(255,255,255,.10),transparent 42%);
+  }
+  .card:hover{transform:translateY(-3px);border-color:rgba(255,255,255,.26);background:var(--glass-strong)}
+  .card.playing{
+    border-color:rgba(224,185,115,.62);
+    background:linear-gradient(150deg,rgba(224,185,115,.16),rgba(255,255,255,.06));
+    box-shadow:0 18px 48px rgba(224,185,115,.20);
+  }
+  .card.loading{border-color:rgba(89,195,184,.5)}
+
+  .card-head{display:flex;align-items:flex-start;gap:12px;position:relative;z-index:1}
+  .card-ico{
+    width:42px;height:42px;flex:0 0 42px;border-radius:13px;display:grid;place-items:center;
+    font-size:16px;color:#150f26;background:linear-gradient(135deg,var(--teal),var(--violet));
+    box-shadow:0 6px 16px rgba(89,195,184,.22);
+  }
+  .card-meta{min-width:0;flex:1}
+  .card-name{
+    font-size:15.5px;font-weight:650;line-height:1.35;margin:0;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+    word-break:break-word;
+  }
+  .card-lang{font-size:11.5px;color:var(--gold);margin-top:4px;letter-spacing:.3px}
+  .card-tags{display:flex;gap:6px;flex-wrap:wrap;position:relative;z-index:1;min-height:0}
+  .tag{
+    font-size:11px;padding:3px 9px;border-radius:999px;color:var(--txt-dim);
+    background:rgba(255,255,255,.06);border:1px solid var(--stroke-soft);
+    max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .card-foot{display:flex;align-items:center;gap:10px;margin-top:auto;position:relative;z-index:1}
+  .bitrate{font-size:11px;color:var(--txt-dim);display:flex;align-items:center;gap:5px}
+  .btn-play{
+    margin-left:auto;display:inline-flex;align-items:center;gap:8px;
+    padding:9px 17px;border-radius:999px;border:1px solid transparent;cursor:pointer;
+    font-size:13.5px;font-weight:600;color:#170f24;
+    background:linear-gradient(135deg,var(--gold),var(--rose));
+    transition:.18s;white-space:nowrap;
+  }
+  .btn-play:hover{filter:brightness(1.08);transform:translateY(-1px)}
+  .btn-play:active{transform:translateY(0) scale(.98)}
+  .btn-play.is-on{background:linear-gradient(135deg,#f0d9a8,#e795a2)}
+
+  .empty{
+    grid-column:1/-1;text-align:center;padding:70px 20px;color:var(--txt-dim);
+    border:1px dashed var(--stroke);border-radius:18px;
+  }
+  .empty i{font-size:38px;display:block;margin-bottom:14px;opacity:.55}
+  .empty b{color:var(--txt);font-weight:600}
+
+  .skel{
+    height:158px;border-radius:18px;border:1px solid var(--stroke-soft);
+    background:linear-gradient(100deg,rgba(255,255,255,.05) 30%,rgba(255,255,255,.12) 50%,rgba(255,255,255,.05) 70%);
+    background-size:220% 100%;animation:sk 1.35s linear infinite;
+  }
+  @keyframes sk{0%{background-position:120% 0}100%{background-position:-20% 0}}
+
+  /* ---------- 底部播放器 ---------- */
+  .player{
+    position:fixed;left:0;right:0;bottom:0;z-index:80;
+    background:rgba(13,9,23,.78);
+    backdrop-filter:blur(22px) saturate(160%);
+    -webkit-backdrop-filter:blur(22px) saturate(160%);
+    border-top:1px solid var(--stroke);
+    box-shadow:0 -14px 40px rgba(0,0,0,.45);
+    transform:translateY(115%);
+    transition:transform .32s cubic-bezier(.22,.8,.3,1);
+  }
+  .player.up{transform:translateY(0)}
+  .player-inner{
+    max-width:1520px;margin:0 auto;padding:12px 20px calc(12px + env(safe-area-inset-bottom));
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+  }
+  .np{display:flex;align-items:center;gap:13px;min-width:0;flex:1 1 320px}
+  .np-art{
+    width:52px;height:52px;flex:0 0 52px;border-radius:14px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--violet),var(--rose));color:#fff;font-size:18px;
+    box-shadow:0 8px 22px rgba(143,124,224,.3);
+  }
+  .np-art.bars{display:flex;align-items:flex-end;justify-content:center;gap:3px;padding-bottom:14px}
+  .np-art.bars span{width:4px;background:#fff;border-radius:2px;animation:eq .95s ease-in-out infinite}
+  .np-art.bars span:nth-child(1){height:12px;animation-delay:0s}
+  .np-art.bars span:nth-child(2){height:22px;animation-delay:.16s}
+  .np-art.bars span:nth-child(3){height:16px;animation-delay:.32s}
+  .np-art.bars span:nth-child(4){height:26px;animation-delay:.48s}
+  @keyframes eq{0%,100%{transform:scaleY(.45)}50%{transform:scaleY(1)}}
+  .np-txt{min-width:0}
+  .np-name{font-size:14.5px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .np-sub{font-size:11.5px;color:var(--txt-dim);margin-top:3px;display:flex;align-items:center;gap:7px}
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--txt-dim);flex:0 0 7px}
+  .dot.live{background:var(--teal);box-shadow:0 0 0 0 rgba(89,195,184,.7);animation:pulse 1.7s infinite}
+  .dot.err{background:var(--danger)}
+  .dot.wait{background:var(--gold);animation:pulse 1.1s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(89,195,184,.6)}70%{box-shadow:0 0 0 9px rgba(89,195,184,0)}100%{box-shadow:0 0 0 0 rgba(89,195,184,0)}}
+
+  .ctrls{display:flex;align-items:center;gap:12px;flex:0 0 auto}
+  .btn-round{
+    width:50px;height:50px;border-radius:50%;border:none;cursor:pointer;
+    display:grid;place-items:center;font-size:17px;color:#170f24;
+    background:linear-gradient(135deg,var(--gold),var(--rose));
+    box-shadow:0 8px 24px rgba(224,185,115,.3);transition:.18s;
+  }
+  .btn-round:hover{filter:brightness(1.09);transform:scale(1.04)}
+  .btn-round:active{transform:scale(.96)}
+  .btn-round[disabled]{opacity:.5;cursor:not-allowed;transform:none}
+  .btn-ghost{
+    width:40px;height:40px;border-radius:50%;cursor:pointer;display:grid;place-items:center;
+    background:var(--glass);border:1px solid var(--stroke);color:var(--txt-dim);font-size:14px;transition:.18s;
+  }
+  .btn-ghost:hover{color:var(--txt);border-color:rgba(255,255,255,.3)}
+
+  .vol{display:flex;align-items:center;gap:10px;flex:0 0 auto;min-width:150px}
+  .vol i{color:var(--txt-dim);font-size:13px;width:16px;text-align:center}
+  input[type=range].rng{
+    -webkit-appearance:none;appearance:none;height:5px;border-radius:5px;flex:1;cursor:pointer;
+    background:linear-gradient(90deg,var(--gold) var(--p,72%),rgba(255,255,255,.16) var(--p,72%));
+    outline:none;
+  }
+  input[type=range].rng::-webkit-slider-thumb{
+    -webkit-appearance:none;width:15px;height:15px;border-radius:50%;background:#fff;
+    border:3px solid var(--gold);box-shadow:0 2px 8px rgba(0,0,0,.35);cursor:pointer;
+  }
+  input[type=range].rng::-moz-range-thumb{
+    width:15px;height:15px;border-radius:50%;background:#fff;border:3px solid var(--gold);cursor:pointer;
+  }
+
+  .spin{
+    width:17px;height:17px;border-radius:50%;
+    border:2px solid rgba(255,255,255,.28);border-top-color:#fff;
+    animation:spin .75s linear infinite;display:inline-block;
+  }
+  @keyframes spin{to{transform:rotate(360deg)}}
+
+  /* ---------- Toast ---------- */
+  .toasts{position:fixed;left:50%;transform:translateX(-50%);top:78px;z-index:200;display:flex;flex-direction:column;gap:9px;align-items:center;pointer-events:none;width:calc(100% - 32px);max-width:460px}
+  .toast{
+    display:flex;align-items:center;gap:11px;padding:12px 17px;border-radius:14px;
+    background:rgba(28,20,44,.9);border:1px solid var(--stroke);color:var(--txt);
+    backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    box-shadow:0 14px 36px rgba(0,0,0,.5);font-size:13.5px;line-height:1.4;
+    animation:tin .3s ease-out;max-width:100%;
+  }
+  .toast i{font-size:15px;flex:0 0 auto}
+  .toast.err i{color:var(--danger)}
+  .toast.ok i{color:var(--teal)}
+  .toast.info i{color:var(--gold)}
+  .toast.out{animation:tout .3s ease-in forwards}
+  @keyframes tin{from{opacity:0;transform:translateY(-12px)}to{opacity:1;transform:none}}
+  @keyframes tout{to{opacity:0;transform:translateY(-12px)}}
+
+  footer{max-width:1520px;margin:0 auto;padding:6px 20px 30px;color:#6f6688;font-size:12px;text-align:center;line-height:1.8}
+  footer a{color:var(--txt-dim);text-decoration:none;border-bottom:1px dotted rgba(255,255,255,.22)}
+
+  @media(max-width:640px){
+    :root{--bar-h:150px}
+    .nav-inner{padding:12px 14px;gap:10px}
+    .brand-title{font-size:16.5px}
+    .brand-title small{font-size:11px}
+    .search{flex:1 1 100%;min-width:0}
+    .stat-pill{display:none}
+    .chips{padding:12px 14px 2px;gap:7px}
+    main{padding:14px 14px 34px}
+    .player-inner{padding:10px 14px calc(10px + env(safe-area-inset-bottom));gap:12px}
+    .np{flex:1 1 100%}
+    .ctrls{flex:1 1 auto;justify-content:flex-start}
+    .vol{flex:1 1 100%;min-width:0}
+  }
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-mark"><i class="fa-solid fa-tower-broadcast"></i></div>
+      <div class="brand-txt">
+        <div class="brand-title">华韵集
+          <small>中国少数民族广播电台 · Ethnic Radio of China</small>
+        </div>
+      </div>
+    </div>
+    <div class="nav-spacer"></div>
+    <div class="search">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <input id="q" type="search" placeholder="搜索电台 / 语言 / 地区…" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="stat-pill"><i class="fa-solid fa-satellite-dish"></i><span id="stat">载入中…</span></div>
+  </div>
+</header>
+
+<div class="chips" id="chips"></div>
+
+<main>
+  <div class="grid" id="grid">
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+    <div class="skel"></div><div class="skel"></div><div class="skel"></div>
+  </div>
+</main>
+
+<footer>
+  数据来源：<a href="https://www.radio-browser.info/" target="_blank" rel="noopener">Radio-Browser.info</a> 开放电台数据库 · 音频流由各电台官方 CDN 直供<br>
+  本站为纯静态页面，不存储、不转播任何音频内容，所有版权归各广播机构所有。
+</footer>
+
+<!-- 底部全局播放器 -->
+<div class="player" id="player">
+  <div class="player-inner">
+    <div class="np">
+      <div class="np-art" id="art"><i class="fa-solid fa-music"></i></div>
+      <div class="np-txt">
+        <div class="np-name" id="npName">未选择电台</div>
+        <div class="np-sub"><span class="dot" id="npDot"></span><span id="npSub">点击任意电台卡片开始收听</span></div>
+      </div>
+    </div>
+    <div class="ctrls">
+      <button class="btn-round" id="btnToggle" title="播放/暂停" disabled><i class="fa-solid fa-play"></i></button>
+      <button class="btn-ghost" id="btnRetry" title="重新连接当前电台"><i class="fa-solid fa-rotate-right"></i></button>
+      <button class="btn-ghost" id="btnStop" title="停止并收起"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="vol">
+      <i class="fa-solid fa-volume-low" id="volIco"></i>
+      <input class="rng" id="vol" type="range" min="0" max="100" step="1" value="72" style="--p:72%">
+    </div>
+  </div>
+</div>
+
+<div class="toasts" id="toasts"></div>
+
+<audio id="audio" preload="none"></audio>
+
+<!-- hls.js：优先本地副本，失败回退 jsDelivr CDN -->
+<script src="hls.min.js" onerror="var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/hls.js@latest/dist/hls.min.js';s.onload=function(){window.__HLS_READY&&window.__HLS_READY()};document.head.appendChild(s);"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* =======================================================================
+     1. 数据源配置
+     ======================================================================= */
+  var MIRRORS = [
+    "https://de1.api.radio-browser.info",
+    "https://nl1.api.radio-browser.info",
+    "https://at1.api.radio-browser.info"
+  ];
+  var QUERY = "/json/stations/bycountry/china?hidebroken=true&limit=20000";
+
+  // 公共 CORS 代理（仅用于 http:// 源；服务不可用时自动跳过）
+  var PROXY = "https://corsproxy.io/?url=";
+
+  // 一级：明确的「语言」标记（按顺序匹配，先命中先归类）
+  var LANGS = [
+    { key:"uyghur",    label:"维吾尔语",    icon:"fa-moon",           re:/维吾尔|维语|uyghur|u[iy]ghur|urumtsi/i },
+    { key:"tibetan",   label:"藏语",        icon:"fa-om",             re:/藏语|藏文|tibetan|bod\s*yig|康巴话|安多话|卫藏/i },
+    { key:"mongolian", label:"蒙古语",      icon:"fa-mountain-sun",   re:/蒙古语|蒙语|蒙古族|mongolian|mongol/i },
+    { key:"korean",    label:"朝鲜语",      icon:"fa-seedling",       re:/朝鲜语|朝鲜族|韩语|korean|조선|문예|뉴스|방송/i },
+    { key:"kazakh",    label:"哈萨克语",    icon:"fa-feather",        re:/哈萨克|哈语|kazakh|qazaq/i },
+    { key:"kyrgyz",    label:"柯尔克孜语",  icon:"fa-feather-pointed",re:/柯尔克孜|柯语|kyrgyz|吉尔吉斯/i },
+    { key:"yi",        label:"彝语",        icon:"fa-fire",           re:/彝语|彝族|nuosu/i },
+    { key:"dai",       label:"傣语",        icon:"fa-water",          re:/傣语|傣族|德傣|西傣/i },
+    { key:"zhuang",    label:"壮语",        icon:"fa-tree",           re:/壮语|壮族|vahcuengh/i },
+    { key:"miao",      label:"苗瑶侗布依语",icon:"fa-leaf",           re:/苗语|苗族|布依语|侗语|水语|瑶语|仡佬/i },
+    { key:"other",     label:"其他民族语言",icon:"fa-language",       re:/傈僳|拉祜|佤语|纳西|景颇|羌语|土家|黎语|畲语|东乡语|裕固|撒拉语|塔吉克|乌孜别克|鄂温克|达斡尔|鄂伦春|赫哲|独龙|基诺|普米|德昂|阿昌|门巴|珞巴|京语|毛南|仫佬|锡伯/i },
+    { key:"ethnic",    label:"民族综合",    icon:"fa-people-group",   re:/民族|minority|ethnic/i }
+  ];
+
+  // 二级：只有地区名命中时 → 归为「民族地区」（诚实标注，不冒充民族语言频道）
+  var REGIONS = [
+    { label:"内蒙古",     re:/内蒙古|内蒙|阿拉善|锡林郭勒|呼伦贝尔|赤峰|通辽|鄂尔多斯|包头|乌海|兴安盟|巴彦淖尔|乌兰察布|呼和浩特/i },
+    { label:"新疆",       re:/新疆|乌鲁木齐|喀什|和田|阿克苏|库尔勒|伊犁|塔城|阿勒泰|哈密|克拉玛依|吐鲁番|博尔塔拉|昌吉|克孜勒苏|石河子/i },
+    { label:"西藏",       re:/西藏|拉萨|日喀则|林芝|那曲|藏北/i },
+    { label:"云南",       re:/云南|德宏|西双版纳|大理|丽江|怒江|迪庆|红河|文山|楚雄|临沧|普洱|保山/i },
+    { label:"四川甘孜阿坝",re:/甘孜|阿坝|凉山|康定|马尔康|西昌/i },
+    { label:"青海",       re:/青海|西宁|海西|海北|黄南|果洛|玉树/i },
+    { label:"甘肃",       re:/甘南|临夏|夏河/i },
+    { label:"延边",       re:/延边|延吉|图们|珲春|龙井/i },
+    { label:"东北民族地区",re:/长白|白山|鹤岗|牡丹江/i },
+    { label:"贵州",       re:/贵州|黔东南|黔南|黔西南|凯里|都匀|兴义/i },
+    { label:"广西",       re:/广西|南宁|柳州|桂林|百色|河池|崇左|来宾|贺州/i },
+    { label:"湘鄂渝",     re:/湘西|恩施|张家界|怀化|黔江/i },
+    { label:"海南",       re:/海南|三亚|五指山|琼中|陵水/i }
+  ];
+
+  // 名称黑名单：宗教直播、明显误命中
+  var BLOCK_NAME = /净宗|念佛|弘化|法師|法师|净空|悟道|佛堂|講堂|讲堂|禪寺|禅寺|苗栗|竹苗|基北桃|乡村广播|測試|test|^\s*$/i;
+
+  /* =======================================================================
+     2. 工具
+     ======================================================================= */
+  var $  = function (id) { return document.getElementById(id); };
+
+  function toast(msg, kind, ms) {
+    kind = kind || "info";
+    var icon = kind === "err" ? "fa-circle-exclamation"
+             : kind === "ok"  ? "fa-circle-check"
+             : "fa-circle-info";
+    var el = document.createElement("div");
+    el.className = "toast " + kind;
+    el.innerHTML = '<i class="fa-solid ' + icon + '"></i><span></span>';
+    el.lastChild.textContent = msg;
+    $("toasts").appendChild(el);
+    setTimeout(function () {
+      el.classList.add("out");
+      setTimeout(function () { el.remove(); }, 320);
+    }, ms || 3600);
+  }
+
+  function isHls(u) { return /\.m3u8(\?|#|$)/i.test(u); }
+  function strip(u) { return (u || "").replace(/\s+/g, ""); }
+
+  function setRangeFill(el) {
+    el.style.setProperty("--p", el.value + "%");
+  }
+
+  /* =======================================================================
+     3. 拉取 + 过滤
+     ======================================================================= */
+  function fetchStations() {
+    var i = 0;
+    function attempt() {
+      if (i >= MIRRORS.length) return Promise.reject(new Error("all mirrors failed"));
+      var url = MIRRORS[i++] + QUERY;
+      return fetch(url, { headers: { "Accept": "application/json" } })
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (d) {
+          if (!Array.isArray(d) || !d.length) throw new Error("empty payload");
+          return d;
+        })
+        .catch(function () { return attempt(); });
+    }
+    return attempt();
+  }
+
+  function pickUrl(s) {
+    var u = strip(s.url_resolved || s.url || "");
+    return u;
+  }
+
+  function classify(name, tags) {
+    var blob = name + " " + tags;
+    var i;
+    // 一级：明确的语言标记优先
+    for (i = 0; i < LANGS.length; i++) {
+      if (LANGS[i].re.test(blob)) {
+        return { key:LANGS[i].key, label:LANGS[i].label, icon:LANGS[i].icon, tier:"lang", region:"" };
+      }
+    }
+    // 二级：仅地区名命中
+    for (i = 0; i < REGIONS.length; i++) {
+      if (REGIONS[i].re.test(blob)) {
+        return { key:"region", label:"民族地区", icon:"fa-location-dot", tier:"region", region:REGIONS[i].label };
+      }
+    }
+    return null;
+  }
+
+  // 归一化电台名，用于合并「同台多线路」
+  function nameKey(n) {
+    return n
+      .replace(/[（(][^）)]*[）)]/g, "")
+      .replace(/(FM|AM)\s*\d+(\.\d+)?/gi, "")
+      .replace(/[^0-9A-Za-z\u4e00-\u9fff\uac00-\ud7af\u3040-\u30ff]/g, "")
+      .toLowerCase();
+  }
+
+  function build(raw) {
+    var seenUrl = Object.create(null);
+    var seenName = Object.create(null);
+    var out = [];
+
+    raw.forEach(function (s) {
+      if (!s) return;
+      var name = (s.name || "").replace(/\s+/g, " ").trim();
+      var tags = (s.tags || "").trim();
+      if (!name || BLOCK_NAME.test(name)) return;
+
+      var cat = classify(name, tags);
+      if (!cat) return;
+
+      var url = pickUrl(s);
+      if (!url || !/^https?:\/\//i.test(url)) return;
+      if (seenUrl[url]) return;
+
+      // 同一电台名的多条线路：优先 https，其次 bitrate 高者
+      var nk = nameKey(name);
+      if (nk && seenName[nk]) {
+        var prev = seenName[nk];
+        var better = (url.indexOf("https://") === 0 && prev.url.indexOf("https://") !== 0)
+          || ((url.indexOf("https://") === 0) === (prev.url.indexOf("https://") === 0)
+              && (s.bitrate || 0) > (prev.bitrate || 0));
+        if (!better) return;
+        out.splice(out.indexOf(prev), 1);
+      }
+
+      var item = {
+        id: s.stationuuid || (name + url),
+        name: name,
+        tags: tags ? tags.split(",").map(function (t) { return t.trim(); }).filter(Boolean).slice(0, 4) : [],
+        rawTags: tags,
+        url: url,
+        cat: cat.key,
+        catLabel: cat.tier === "region" ? "民族地区 · " + cat.region : cat.label,
+        catIcon: cat.icon,
+        codec: (s.codec || "").toUpperCase(),
+        bitrate: s.bitrate || 0,
+        home: s.homepage || ""
+      };
+      seenUrl[url] = true;
+      if (nk) seenName[nk] = item;
+      out.push(item);
+    });
+
+    // 排序：语言分类固定顺序 → 民族地区 → 名称
+    var order = { region: LANGS.length };
+    LANGS.forEach(function (c, i) { order[c.key] = i; });
+    out.sort(function (a, b) {
+      var d = (order[a.cat] === undefined ? 99 : order[a.cat]) - (order[b.cat] === undefined ? 99 : order[b.cat]);
+      return d !== 0 ? d : a.name.localeCompare(b.name, "zh-Hans-CN");
+    });
+    return out;
+  }
+
+  /* =======================================================================
+     4. 状态
+     ======================================================================= */
+  var ALL = [];          // 全部电台
+  var VIEW = [];         // 当前筛选结果
+  var filterCat = "all";
+  var keyword = "";
+
+  var audio = $("audio");
+  var hls = null;
+  var current = null;    // 当前电台对象
+  var candidates = [];   // 当前电台的候选地址（依次尝试）
+  var candIdx = 0;
+  var retried = false;
+
+  /* =======================================================================
+     5. 渲染
+     ======================================================================= */
+  function renderChips() {
+    var box = $("chips");
+    var counts = { all: ALL.length };
+    LANGS.forEach(function (c) { counts[c.key] = 0; });
+    counts.region = 0;
+    ALL.forEach(function (s) { counts[s.cat] = (counts[s.cat] || 0) + 1; });
+
+    var html = '<span class="chip' + (filterCat === "all" ? " on" : "") + '" data-cat="all">'
+             + '<i class="fa-solid fa-globe"></i> 全部<span class="n">' + counts.all + '</span></span>';
+    LANGS.forEach(function (c) {
+      if (!counts[c.key]) return;
+      html += '<span class="chip' + (filterCat === c.key ? " on" : "") + '" data-cat="' + c.key + '">'
+            + '<i class="fa-solid ' + c.icon + '"></i> ' + c.label
+            + '<span class="n">' + counts[c.key] + '</span></span>';
+    });
+    if (counts.region) {
+      html += '<span class="chip' + (filterCat === "region" ? " on" : "") + '" data-cat="region">'
+            + '<i class="fa-solid fa-location-dot"></i> 民族地区<span class="n">' + counts.region + '</span></span>';
+    }
+    box.innerHTML = html;
+    box.querySelectorAll(".chip").forEach(function (el) {
+      el.addEventListener("click", function () {
+        filterCat = el.getAttribute("data-cat");
+        renderChips(); applyFilter();
+      });
+    });
+  }
+
+  function applyFilter() {
+    var kw = keyword.trim().toLowerCase();
+    VIEW = ALL.filter(function (s) {
+      if (filterCat !== "all" && s.cat !== filterCat) return false;
+      if (!kw) return true;
+      return (s.name + " " + s.rawTags + " " + s.catLabel).toLowerCase().indexOf(kw) >= 0;
+    });
+    renderGrid();
+  }
+
+  function renderGrid() {
+    var grid = $("grid");
+    $("stat").innerHTML = "已收录 <b>" + ALL.length + "</b> 个台" + (VIEW.length !== ALL.length ? " · 当前 " + VIEW.length : "");
+    if (!VIEW.length) {
+      grid.innerHTML = '<div class="empty"><i class="fa-solid fa-satellite"></i>'
+        + '没有匹配的电台<br><b>换个关键词或选择「全部」试试</b></div>';
+      return;
+    }
+    var frag = document.createDocumentFragment();
+    VIEW.forEach(function (s) {
+      var card = document.createElement("article");
+      card.className = "card";
+      card.setAttribute("data-id", s.id);
+
+      var head = document.createElement("div");
+      head.className = "card-head";
+      var ico = document.createElement("div");
+      ico.className = "card-ico";
+      ico.innerHTML = '<i class="fa-solid ' + s.catIcon + '"></i>';
+      var meta = document.createElement("div");
+      meta.className = "card-meta";
+      var nm = document.createElement("h3");
+      nm.className = "card-name";
+      nm.textContent = s.name;
+      var lg = document.createElement("div");
+      lg.className = "card-lang";
+      lg.textContent = s.catLabel;
+      meta.appendChild(nm); meta.appendChild(lg);
+      head.appendChild(ico); head.appendChild(meta);
+
+      var tags = document.createElement("div");
+      tags.className = "card-tags";
+      s.tags.forEach(function (t) {
+        var el = document.createElement("span");
+        el.className = "tag";
+        el.textContent = t;
+        tags.appendChild(el);
+      });
+
+      var foot = document.createElement("div");
+      foot.className = "card-foot";
+      var br = document.createElement("span");
+      br.className = "bitrate";
+      var bits = [];
+      if (s.codec && s.codec !== "UNKNOWN") bits.push(s.codec);
+      if (s.bitrate) bits.push(s.bitrate + " kbps");
+      bits.push(isHls(s.url) ? "HLS" : (s.url.indexOf("https://") === 0 ? "HTTPS" : "HTTP"));
+      br.innerHTML = '<i class="fa-solid fa-signal"></i>' + bits.join(" · ");
+
+      var btn = document.createElement("button");
+      btn.className = "btn-play";
+      btn.innerHTML = '<i class="fa-solid fa-play"></i><span>播放</span>';
+      btn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        toggleStation(s, card, btn);
+      });
+
+      foot.appendChild(br); foot.appendChild(btn);
+      card.appendChild(head); card.appendChild(tags); card.appendChild(foot);
+      card.addEventListener("click", function () { toggleStation(s, card, btn); });
+      frag.appendChild(card);
+    });
+    grid.innerHTML = "";
+    grid.appendChild(frag);
+    syncCards();
+  }
+
+  /* =======================================================================
+     6. 播放核心
+     ======================================================================= */
+  function candidateUrls(item) {
+    var list = [];
+    var u = item.url;
+    if (u.indexOf("https://") === 0) {
+      list.push({ url: u, proxied: false });
+    } else {
+      // http 源：先试 https 升级（避开混合内容拦截），再走 CORS 代理，最后原样
+      var up = u.replace(/^http:\/\//i, "https://");
+      list.push({ url: up, proxied: false });
+      list.push({ url: PROXY + encodeURIComponent(u), proxied: true, origin: u });
+      list.push({ url: u, proxied: false });
+    }
+    // 去重
+    var seen = Object.create(null);
+    return list.filter(function (c) {
+      if (!c.url || seen[c.url]) return false;
+      seen[c.url] = true;
+      return true;
+    });
+  }
+
+  function destroyHls() {
+    if (hls) { try { hls.destroy(); } catch (e) {} hls = null; }
+  }
+
+  function hardStop() {
+    destroyHls();
+    try { audio.pause(); } catch (e) {}
+    audio.removeAttribute("src");
+    try { audio.load(); } catch (e) {}
+  }
+
+  function setStatus(state, text) {
+    var dot = $("npDot");
+    dot.className = "dot" + (state === "live" ? " live" : state === "err" ? " err" : state === "wait" ? " wait" : "");
+    $("npSub").textContent = text;
+    $("art").className = (state === "live") ? "np-art bars" : "np-art";
+    if (state === "live") {
+      $("art").innerHTML = "<span></span><span></span><span></span><span></span>";
+    } else {
+      $("art").innerHTML = '<i class="fa-solid fa-music"></i>';
+    }
+  }
+
+  function setToggleIcon(playing) {
+    $("btnToggle").innerHTML = '<i class="fa-solid ' + (playing ? "fa-pause" : "fa-play") + '"></i>';
+  }
+
+  function syncCards() {
+    document.querySelectorAll(".card").forEach(function (c) {
+      var on = current && c.getAttribute("data-id") === current.id && !audio.paused;
+      c.classList.toggle("playing", !!on);
+      c.classList.toggle("loading", !!(current && c.getAttribute("data-id") === current.id && audio.paused && $("npDot").classList.contains("wait")));
+      var b = c.querySelector(".btn-play");
+      if (!b) return;
+      var isCur = current && c.getAttribute("data-id") === current.id;
+      b.classList.toggle("is-on", !!on);
+      if (!isCur) {
+        b.innerHTML = '<i class="fa-solid fa-play"></i><span>播放</span>';
+      } else if (on) {
+        b.innerHTML = '<i class="fa-solid fa-pause"></i><span>暂停</span>';
+      } else if ($("npDot").classList.contains("wait")) {
+        b.innerHTML = '<span class="spin"></span><span>缓冲</span>';
+      } else {
+        b.innerHTML = '<i class="fa-solid fa-play"></i><span>继续</span>';
+      }
+    });
+  }
+
+  function failMsg(extra) {
+    toast("该直播源暂时不可用，请尝试其他电台" + (extra ? "（" + extra + "）" : ""), "err");
+    setStatus("err", "连接失败 · 可换台或点重试");
+    $("btnToggle").disabled = true;
+    setToggleIcon(false);
+    syncCards();
+  }
+
+  function loadCandidate() {
+    if (!current) return;
+    if (candIdx >= candidates.length) { failMsg("已尝试 " + candidates.length + " 条线路"); return; }
+
+    var cand = candidates[candIdx++];
+    var url = cand.url;
+    destroyHls();
+    setStatus("wait", "正在连接…（线路 " + candIdx + "/" + candidates.length + "）");
+    $("btnToggle").disabled = false;
+    syncCards();
+
+    var useHls = isHls(url) || (!audio.canPlayType("application/vnd.apple.mpegurl") && /m3u8/i.test(url));
+
+    if (useHls) {
+      if (window.Hls && Hls.isSupported()) {
+        hls = new Hls({ lowLatencyMode: false, enableWorker: true, maxBufferLength: 20, manifestLoadingMaxRetry: 1, levelLoadingMaxRetry: 1, fragLoadingMaxRetry: 2 });
+        var settled = false;
+        hls.on(Hls.Events.MANIFEST_PARSED, function () { settled = true; play(); });
+        hls.on(Hls.Events.ERROR, function (evt, data) {
+          if (!data || !data.fatal) return;
+          if (data.type === Hls.ErrorTypes.MEDIA_ERROR) { try { hls.recoverMediaError(); return; } catch (e) {} }
+          settled = true;
+          loadCandidate();
+        });
+        setTimeout(function () { if (!settled && !audio.currentTime) { settled = true; loadCandidate(); } }, 9000);
+        try { hls.loadSource(url); hls.attachMedia(audio); }
+        catch (e) { loadCandidate(); }
+      } else if (audio.canPlayType("application/vnd.apple.mpegurl")) {
+        // Safari 原生 HLS：无需 CORS
+        audio.src = url;
+        play();
+      } else if (cand.origin && !cand.proxied) {
+        // 非代理且 js 不受支持 → 换下一线路
+        loadCandidate();
+      } else {
+        loadCandidate();
+      }
+    } else {
+      audio.src = url;
+      play();
+    }
+  }
+
+  function play() {
+    var p = audio.play();
+    if (p && p.catch) {
+      p.catch(function (err) {
+        // 自动播放被拦 / 源不可用
+        if (err && err.name === "NotAllowedError") {
+          failMsg("浏览器拦截了自动播放，请再点一次");
+        } else {
+          loadCandidate();
+        }
+      });
+    }
+  }
+
+  function selectStation(item, forceReload) {
+    var same = current && current.id === item.id;
+    if (same && !forceReload) return;
+    current = item;
+    candidates = candidateUrls(item);
+    candIdx = 0;
+
+    $("player").classList.add("up");
+    $("npName").textContent = item.name;
+    $("npName").title = item.name;
+    setStatus("wait", "正在连接…");
+    setToggleIcon(false);
+    syncCards();
+    loadCandidate();
+
+    try { localStorage.setItem("ethnic.last", item.id); } catch (e) {}
+  }
+
+  function toggleStation(item, card, btn) {
+    if (current && current.id === item.id && !$("npDot").classList.contains("err")) {
+      if (audio.paused) { setStatus("wait", "继续播放…"); play(); }
+      else { audio.pause(); }
+      return;
+    }
+    selectStation(item, true);
+  }
+
+  /* =======================================================================
+     7. 音频事件绑定
+     ======================================================================= */
+  audio.addEventListener("playing", function () {
+    retried = false;
+    setStatus("live", "正在直播" + (current && current.catLabel ? " · " + current.catLabel : ""));
+    $("btnToggle").disabled = false;
+    setToggleIcon(true);
+    syncCards();
+  });
+  audio.addEventListener("pause", function () {
+    if ($("npDot").classList.contains("err")) return;
+    setStatus("", "已暂停");
+    setToggleIcon(false);
+    syncCards();
+  });
+  audio.addEventListener("waiting", function () {
+    setStatus("wait", "缓冲中…");
+    syncCards();
+  });
+  audio.addEventListener("stalled", function () {
+    setStatus("wait", "网络波动，正在重新缓冲…");
+    syncCards();
+  });
+  audio.addEventListener("error", function () {
+    if (!current) return;
+    if (!retried) {
+      retried = true;
+      setStatus("wait", "连接中断，换线路重试…");
+      syncCards();
+    }
+    loadCandidate();
+  });
+  audio.addEventListener("ended", function () {
+    setStatus("", "直播已结束");
+    setToggleIcon(false);
+    syncCards();
+  });
+
+  $("btnToggle").addEventListener("click", function () {
+    if (!current) return;
+    if (audio.paused) { setStatus("wait", "继续播放…"); play(); }
+    else audio.pause();
+  });
+  $("btnRetry").addEventListener("click", function () {
+    if (!current) { toast("还没有选择电台", "info"); return; }
+    candIdx = 0; retried = false; hardStop();
+    setStatus("wait", "重新连接…");
+    loadCandidate();
+  });
+  $("btnStop").addEventListener("click", function () {
+    hardStop();
+    current = null;
+    setStatus("", "已停止");
+    $("npName").textContent = "未选择电台";
+    setToggleIcon(false);
+    $("btnToggle").disabled = true;
+    $("player").classList.remove("up");
+    syncCards();
+    try { localStorage.removeItem("ethnic.last"); } catch (e) {}
+  });
+
+  /* 音量 */
+  var vol = $("vol");
+  function applyVol() {
+    audio.volume = Math.min(1, Math.max(0, vol.value / 100));
+    audio.muted = vol.value === 0;
+    $("volIco").className = "fa-solid " + (vol.value == 0 ? "fa-volume-xmark" : vol.value < 45 ? "fa-volume-low" : "fa-volume-high");
+    setRangeFill(vol);
+    try { localStorage.setItem("ethnic.vol", vol.value); } catch (e) {}
+  }
+  vol.addEventListener("input", applyVol);
+  try {
+    var sv = localStorage.getItem("ethnic.vol");
+    if (sv !== null) vol.value = sv;
+  } catch (e) {}
+  applyVol();
+
+  /* 搜索 */
+  var timer = null;
+  $("q").addEventListener("input", function (e) {
+    keyword = e.target.value;
+    clearTimeout(timer);
+    timer = setTimeout(applyFilter, 160);
+  });
+
+  /* 键盘：空格播放/暂停 */
+  document.addEventListener("keydown", function (e) {
+    if (e.code === "Space" && current && document.activeElement.tagName !== "INPUT") {
+      e.preventDefault();
+      if (audio.paused) play(); else audio.pause();
+    }
+  });
+
+  /* =======================================================================
+     8. 启动
+     ======================================================================= */
+  function boot() {
+    fetchStations().then(function (raw) {
+      ALL = build(raw);
+      if (!ALL.length) {
+        $("grid").innerHTML = '<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>'
+          + '未能从电台数据库筛选出可用电台<br><b>请检查网络后刷新页面</b></div>';
+        $("stat").textContent = "无数据";
+        return;
+      }
+      renderChips();
+      applyFilter();
+
+      // 恢复上次收听
+      try {
+        var last = localStorage.getItem("ethnic.last");
+        if (last) {
+          var hit = ALL.filter(function (s) { return s.id === last; })[0];
+          if (hit) {
+            current = hit;
+            $("player").classList.add("up");
+            $("npName").textContent = hit.name;
+            setStatus("", "上次收听 · 点播放继续");
+            $("btnToggle").disabled = false;
+            candidates = candidateUrls(hit);
+            candIdx = 0;
+            syncCards();
+          }
+        }
+      } catch (e) {}
+    }).catch(function () {
+      $("grid").innerHTML = '<div class="empty"><i class="fa-solid fa-wifi"></i>'
+        + '电台数据库连接失败<br><b>请检查网络或稍后刷新</b></div>';
+      $("stat").textContent = "连接失败";
+      toast("无法连接电台数据库，请检查网络后刷新", "err", 6000);
+    });
+  }
+
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
+  else boot();
+})();
+</script>
+</body>
+</html>
