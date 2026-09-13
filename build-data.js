@@ -43,12 +43,20 @@ function sliceBlock(startMarker, endMarker) {
 
 const configSrc = sliceBlock("var LANGS = [", "\n  /* ==");
 const helperSrc = sliceBlock("var BLOCK_NAME", "\n  /*");
+// 人工核验修正表：BLOCK_NAME 之后单独抽一段，避免与上面的锚点重叠
+const deadSrc = sliceBlock("var DEAD_NAMES", "function isDeadUrl");
 
-// 在沙箱里求值这两段，拿到 LANGS / REGIONS / BLOCK_NAME
+// 在沙箱里求值这几段，拿到 LANGS / REGIONS / BLOCK_NAME / DEAD_NAMES / DEAD_URLS
 const factory = new Function(
-  configSrc + "\n" + helperSrc + "\nreturn { LANGS: LANGS, REGIONS: REGIONS, BLOCK_NAME: BLOCK_NAME };"
+  configSrc + "\n" + helperSrc + "\n" + deadSrc +
+  "\nreturn { LANGS: LANGS, REGIONS: REGIONS, BLOCK_NAME: BLOCK_NAME, DEAD_NAMES: DEAD_NAMES, DEAD_URLS: DEAD_URLS };"
 );
 const CFG = factory();
+
+function isDeadUrl(u) {
+  const s = String(u || "");
+  return CFG.DEAD_URLS.some((p) => s.indexOf(p) === 0);
+}
 
 /* ---------- 2. 与页面同款的归一化/分类/合并逻辑 ---------- */
 function strip(u) { return (u || "").replace(/\s+/g, ""); }
@@ -86,6 +94,7 @@ function build(raw) {
     const name = (s.name || "").replace(/\s+/g, " ").trim();
     const tags = (s.tags || "").trim();
     if (!name || CFG.BLOCK_NAME.test(name)) continue;
+    if (CFG.DEAD_NAMES.test(name)) continue;   // 人工核验：名不副实，直接丢弃
 
     const cat = classify(name, tags);
     if (!cat) continue;
@@ -125,6 +134,9 @@ function build(raw) {
   const order = { region: CFG.LANGS.length };
   CFG.LANGS.forEach((c, i) => { order[c.key] = i; });
   out.sort((a, b) => {
+    const da = isDeadUrl(a.url) ? 1 : 0;
+    const db = isDeadUrl(b.url) ? 1 : 0;
+    if (da !== db) return da - db;              // 已失效的沉底
     const d = (order[a.cat] === undefined ? 99 : order[a.cat]) - (order[b.cat] === undefined ? 99 : order[b.cat]);
     return d !== 0 ? d : a.name.localeCompare(b.name, "zh-Hans-CN");
   });

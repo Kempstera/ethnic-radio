@@ -144,6 +144,10 @@
   .s-play:hover{filter:brightness(1.06);transform:scale(1.06)}
   .s-play svg{width:17px;height:17px;display:block}
   .station-card.is-current .s-play{background:#1D1D1F}
+  .station-card.is-dead{opacity:.6}
+  .station-card.is-dead .s-play{background:#C7C7CC;box-shadow:none}
+  .station-card.is-dead .s-play:hover{filter:none;transform:none}
+  .s-tag.dead{background:#FFF0EF;color:#C0392B}
 
   .empty{
     grid-column:1/-1;text-align:center;padding:80px 24px;
@@ -395,6 +399,24 @@
 
   var BLOCK_NAME = /净宗|念佛|弘化|法師|法师|净空|悟道|佛堂|講堂|讲堂|禪寺|禅寺|苗栗|竹苗|基北桃|乡村广播|測試|test|^\s*$/i;
 
+  /* 人工核验后的修正表 --------------------------------------------------
+     DEAD_NAMES：名字本身就不该出现的（误收录/名不副实）→ 直接丢弃。
+     DEAD_URLS ：源已失效但先保留（让用户看得见、点得着）→ 列表里沉底并标「已失效」。
+     两处修改都要同步到 build-data.js 一侧的抽取结果（自动，无需另改）。
+     ------------------------------------------------------------------- */
+  var DEAD_NAMES = /山东维语都市广播/;
+  var DEAD_URLS = [
+    "https://tvpull.hmgbtv.com/",   // 哈密维语广播（域名不可达）
+    "https://klmysjtzb.rcsxzx.com/" // 克拉玛依维吾尔语综合广播（HLS 无响应）
+  ];
+
+  function isDeadUrl(u) {
+    for (var i = 0; i < DEAD_URLS.length; i++) {
+      if (String(u || "").indexOf(DEAD_URLS[i]) === 0) return true;
+    }
+    return false;
+  }
+
   /* =====================================================================
      工具：超时 / 取数
      ===================================================================== */
@@ -451,6 +473,8 @@
       var tags = (s.tags || "").trim();
       if (!name || BLOCK_NAME.test(name)) return;
 
+      if (DEAD_NAMES.test(name)) return;
+
       var cat = classify(name, tags);
       if (!cat) return;
 
@@ -486,6 +510,9 @@
     var order = { region: LANGS.length };
     LANGS.forEach(function (c, i) { order[c.key] = i; });
     out.sort(function (a, b) {
+      /* 已失效的电台永远沉到列表最后 */
+      var da = isDeadUrl(a.url) ? 1 : 0, db = isDeadUrl(b.url) ? 1 : 0;
+      if (da !== db) return da - db;
       var d = (order[a.cat] === undefined ? 99 : order[a.cat]) - (order[b.cat] === undefined ? 99 : order[b.cat]);
       return d !== 0 ? d : a.name.localeCompare(b.name, "zh-Hans-CN");
     });
@@ -496,7 +523,8 @@
   function normalize(data) {
     var list = (data && data.stations) ? data.stations : data;
     if (!Array.isArray(list)) return [];
-    return list.map(function (s, i) {
+    var dead = [];
+    var live = list.map(function (s, i) {
       return {
         id: s.id || ("s" + i),
         name: s.name || "未命名电台",
@@ -507,7 +535,12 @@
         codec: (s.codec || "").toUpperCase(),
         bitrate: s.bitrate || 0
       };
-    }).filter(function (s) { return /^https?:\/\//i.test(s.url); });
+    }).filter(function (s) {
+      if (!/^https?:\/\//i.test(s.url)) return false;
+      if (isDeadUrl(s.url)) { dead.push(s); return false; }
+      return true;
+    });
+    return live.concat(dead);   // 已失效的沉底
   }
 
   /* =====================================================================
@@ -634,6 +667,14 @@
       el.textContent = t;
       tags.appendChild(el);
     });
+
+    if (isDeadUrl(s.url)) {
+      card.classList.add("is-dead");
+      var dt = document.createElement("span");
+      dt.className = "s-tag dead";
+      dt.textContent = "已失效";
+      tags.appendChild(dt);
+    }
 
     var foot = document.createElement("div");
     foot.className = "s-foot";
