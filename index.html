@@ -446,12 +446,41 @@
   /* =======================================================================
      3. 拉取 + 过滤
      ======================================================================= */
-  function fetchStations() {
+  /* 带超时的 fetch：跨海请求可能永远挂住（浏览器默认超时非常久），
+     必须自己掐断，否则页面就永远停在骨架屏上。 */
+  function fetchWithTimeout(url, ms) {
+    if (!window.AbortController) {
+      return fetch(url, { headers: { "Accept": "application/json" } });
+    }
+    var ctrl = new AbortController();
+    var timer = setTimeout(function () { ctrl.abort(); }, ms);
+    return fetch(url, { headers: { "Accept": "application/json" }, signal: ctrl.signal })
+      .then(function (r) { clearTimeout(timer); return r; },
+            function (e) { clearTimeout(timer); throw e; });
+  }
+
+  /* 首选：同域静态数据（构建期烤好，必然可达，毫秒级） */
+  function fetchBaked() {
+    return fetchWithTimeout("stations.json?v=" + Date.now(), 12000)
+      .then(function (r) {
+        if (!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(function (d) {
+        var list = d && d.stations ? d.stations : d;
+        if (!Array.isArray(list) || !list.length) throw new Error("empty payload");
+        return list;
+      });
+  }
+
+  /* 备用：实时拉取（三个欧洲镜像轮流试，每个都有超时上限）
+     仅在烤好的数据取不到时才用来兜底。 */
+  function fetchLive() {
     var i = 0;
     function attempt() {
       if (i >= MIRRORS.length) return Promise.reject(new Error("all mirrors failed"));
-      var url = MIRRORS[i++] + QUERY;
-      return fetch(url, { headers: { "Accept": "application/json" } })
+      var base = MIRRORS[i++];
+      return fetchWithTimeout(base + QUERY, 15000)
         .then(function (r) {
           if (!r.ok) throw new Error("HTTP " + r.status);
           return r.json();
@@ -463,6 +492,12 @@
         .catch(function () { return attempt(); });
     }
     return attempt();
+  }
+
+  /* 烤好的数据是「已筛选」的成品；实时数据是「原始」的，要过 build()。
+     后台补齐时用原始流程，再和已有列表合并。 */
+  function fetchLiveBuilt() {
+    return fetchLive().then(function (raw) { return build(raw); });
   }
 
   function pickUrl(s) {
@@ -938,41 +973,106 @@
   /* =======================================================================
      8. 启动
      ======================================================================= */
-  function boot() {
-    fetchStations().then(function (raw) {
-      ALL = build(raw);
-      if (!ALL.length) {
-        $("grid").innerHTML = '<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>'
-          + '未能从电台数据库筛选出可用电台<br><b>请检查网络后刷新页面</b></div>';
-        $("stat").textContent = "无数据";
-        return;
-      }
-      renderChips();
-      applyFilter();
+  var BOOTED = false;   // 是否已成功渲染过
 
-      // 恢复上次收听
-      try {
-        var last = localStorage.getItem("ethnic.last");
-        if (last) {
-          var hit = ALL.filter(function (s) { return s.id === last; })[0];
-          if (hit) {
-            current = hit;
-            $("player").classList.add("up");
-            $("npName").textContent = hit.name;
-            setStatus("", "上次收听 · 点播放继续");
-            $("btnToggle").disabled = false;
-            candidates = candidateUrls(hit);
-            candIdx = 0;
-            syncCards();
-          }
-        }
-      } catch (e) {}
-    }).catch(function () {
-      $("grid").innerHTML = '<div class="empty"><i class="fa-solid fa-wifi"></i>'
-        + '电台数据库连接失败<br><b>请检查网络或稍后刷新</b></div>';
-      $("stat").textContent = "连接失败";
-      toast("无法连接电台数据库，请检查网络后刷新", "err", 6000);
+  /* 把新列表合并进已有列表（按地址去重，同名优先 https/高码率） */
+  function mergeIn(base, extra) {
+    var seenUrl = Object.create(null);
+    base.forEach(function (s) { seenUrl[s.url] = true; });
+    var seenName = Object.create(null);
+    base.forEach(function (s) { seenName[nameKey(s.name)] = s; });
+    var added = 0;
+    extra.forEach(function (s) {
+      if (seenUrl[s.url]) return;
+      var nk = nameKey(s.name);
+      if (nk && seenName[nk]) return;   // 同台另一条线路，已有就不重复
+      base.push(s);
+      seenUrl[s.url] = true;
+      if (nk) seenName[nk] = s;
+      added++;
     });
+    if (!added) return false;
+    var order = { region: LANGS.length };
+    LANGS.forEach(function (c, i) { order[c.key] = i; });
+    base.sort(function (a, b) {
+      var d = (order[a.cat] === undefined ? 99 : order[a.cat]) - (order[b.cat] === undefined ? 99 : order[b.cat]);
+      return d !== 0 ? d : a.name.localeCompare(b.name, "zh-Hans-CN");
+    });
+    return true;
+  }
+
+  function renderList(list) {
+    ALL = list;
+    renderChips();
+    applyFilter();
+    BOOTED = true;
+  }
+
+  function showEmpty(kind) {
+    if (BOOTED) return;   // 已有内容就不覆盖
+    $("grid").innerHTML = kind === "none"
+      ? '<div class="empty"><i class="fa-solid fa-plug-circle-xmark"></i>'
+        + '未能从电台数据库筛选出可用电台<br><b>请检查网络后刷新页面</b></div>'
+      : '<div class="empty"><i class="fa-solid fa-wifi"></i>'
+        + '电台数据连接失败<br><b>请检查网络或稍后刷新</b></div>';
+    $("stat").textContent = kind === "none" ? "无数据" : "连接失败";
+    if (kind !== "none") toast("无法连接电台数据，请检查网络后刷新", "err", 6000);
+  }
+
+  function restoreLast() {
+    try {
+      var last = localStorage.getItem("ethnic.last");
+      if (!last) return;
+      var hit = ALL.filter(function (s) { return s.id === last; })[0];
+      if (!hit) return;
+      current = hit;
+      $("player").classList.add("up");
+      $("npName").textContent = hit.name;
+      setStatus("", "上次收听 · 点播放继续");
+      $("btnToggle").disabled = false;
+      candidates = candidateUrls(hit);
+      candIdx = 0;
+      syncCards();
+    } catch (e) {}
+  }
+
+  /* 后台静默补齐：在线数据能拿到就合并新增的台；失败就算了，不影响页面 */
+  function backgroundRefresh() {
+    fetchLiveBuilt().then(function (live) {
+      if (!live || !live.length) return;
+      if (mergeIn(ALL, live)) {
+        renderChips();
+        applyFilter();
+        toast("已锶补在线新增电台，现共 " + ALL.length + " 个", "ok", 2600);
+      }
+    }).catch(function () {});
+  }
+
+  function boot() {
+    // 第一优先级：同域烤好的静态数据
+    fetchBaked()
+      .then(function (baked) {
+        renderList(baked);
+        restoreLast();
+        backgroundRefresh();
+      })
+      .catch(function () {
+        // 烤好的数据都取不到（极少见）：退回实时拉取
+        return fetchLiveBuilt()
+          .then(function (live) { renderList(live); restoreLast(); })
+          .catch(function () { showEmpty("fail"); });
+      });
+
+    // 全局兜底：12 秒后仍未渲染出任何内容，提示并提供重试
+    setTimeout(function () {
+      if (!BOOTED) {
+        $("grid").innerHTML = '<div class="empty"><i class="fa-solid fa-hourglass-half"></i>'
+          + '正在连接电台数据…<br><b>网络较慢，可点击下方按钮重试</b>'
+          + '<br><br><button class="btn-primary" onclick="location.reload()">'
+          + '<i class="fa-solid fa-rotate-right"></i> 重新加载</button></div>';
+        $("stat").textContent = "加载中…";
+      }
+    }, 12000);
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", boot);
