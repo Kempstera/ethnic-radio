@@ -19,6 +19,7 @@
     -webkit-font-smoothing:antialiased;
     -webkit-tap-highlight-color:transparent;
     padding-bottom:132px;
+    padding-top:52px;
   }
   button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
   h1,h2,h3,p{margin:0}
@@ -63,6 +64,38 @@
   .view{animation:fade .28s ease}
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
+  /* ============ 顶栏 · 返回主页 + 语言切换 ============ */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:70;
+    display:flex;align-items:center;gap:12px;
+    padding:9px clamp(14px,3vw,24px);
+    background:rgba(245,247,250,.72);
+    -webkit-backdrop-filter:blur(18px) saturate(180%);backdrop-filter:blur(18px) saturate(180%);
+    border-bottom:1px solid rgba(0,0,0,.05);
+    pointer-events:none;
+  }
+  .topbar > *{pointer-events:auto}
+  .topbar .home{
+    display:inline-flex;align-items:center;gap:6px;
+    padding:8px 15px;border-radius:999px;
+    background:#FFFFFF;color:#1D1D1F;
+    font-size:13.5px;font-weight:600;letter-spacing:-.01em;
+    box-shadow:0 2px 12px rgba(0,0,0,.06);
+    transition:color .2s ease,transform .2s ease,box-shadow .2s ease;
+  }
+  .topbar .home:hover{color:#0071E3;transform:translateX(-2px);box-shadow:0 6px 18px rgba(0,0,0,.10)}
+  .topbar .lang{
+    margin-left:auto;display:inline-flex;overflow:hidden;
+    border:1px solid rgba(0,0,0,.06);border-radius:999px;
+    background:#FFFFFF;box-shadow:0 2px 12px rgba(0,0,0,.06);
+  }
+  .topbar .lang button{
+    border:0;background:transparent;color:#6E6E73;font:inherit;
+    font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;
+    transition:background .22s ease,color .22s ease;
+  }
+  .topbar .lang button.on{background:#1D1D1F;color:#FFFFFF}
+
   .home-head{max-width:1000px;margin:0 auto;padding:76px 24px 44px;text-align:center}
   .home-head h1{font-size:44px;font-weight:700;letter-spacing:-1px;line-height:1.15}
   .home-head p{margin-top:14px;font-size:17px;color:#86868B;letter-spacing:.2px}
@@ -89,7 +122,7 @@
 
   /* ============ 列表屏幕 · 详情页 ============ */
   .list-bar{
-    position:sticky;top:0;z-index:60;
+    position:sticky;top:52px;z-index:60;
     background:rgba(245,247,250,.82);
     -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
     padding:18px 24px 14px;
@@ -247,28 +280,40 @@
     .player{bottom:12px;gap:12px;padding:12px 14px;border-radius:22px}
     .p-info{flex:1 1 100%}
     .p-vol{width:100%;flex:1 1 100%}
+    .home-head{padding-top:64px}
+    .topbar .home{padding:7px 12px;font-size:12.5px}
+    .topbar .lang button{padding:6px 12px;font-size:12px}
   }
 </style>
 </head>
 <body>
 
+<!-- 顶栏：返回主页 + 语言切换 -->
+<div class="topbar">
+  <a class="home" href="https://radio.signupeverywhere.cc/" data-zh="← 返回主页" data-en="← Home">← 返回主页</a>
+  <div class="lang" id="lang" role="group" aria-label="Language / 语言">
+    <button type="button" data-lang="en">EN</button>
+    <button type="button" data-lang="zh" class="on">中文</button>
+  </div>
+</div>
+
 <!-- 加载遮罩 -->
 <div class="overlay" id="loading">
   <div class="spinner"></div>
-  <p id="loadingText">正在加载电台数据…</p>
+  <p id="loadingText" data-zh="正在加载电台数据…" data-en="Loading stations…">正在加载电台数据…</p>
 </div>
 
 <!-- 主屏幕：分类导航 -->
 <section class="view" id="view-home">
   <header class="home-head">
-    <h1>华韵集</h1>
-    <p>中国少数民族广播电台</p>
+    <h1 data-zh="华韵集" data-en="China's Voices">华韵集</h1>
+    <p data-zh="中国少数民族广播电台" data-en="Radio in China's minority languages">中国少数民族广播电台</p>
   </header>
   <div class="notice" id="notice" hidden></div>
   <div class="cat-grid" id="catGrid"></div>
   <div class="site-foot">
-    数据来源：<a href="https://www.radio-browser.info/" target="_blank" rel="noopener">Radio-Browser.info</a> 开放电台数据库 · 音频流由各电台官方 CDN 直供<br>
-    本站为纯静态页面，不存储、不转播任何音频内容，版权归各广播机构所有。
+    <span data-zh="数据来源：" data-en="Data from ">数据来源：</span><a href="https://www.radio-browser.info/" target="_blank" rel="noopener">Radio-Browser.info</a><span data-zh=" 开放电台数据库 · 音频流由各电台官方 CDN 直供" data-en=" open station database · audio streams come direct from each broadcaster's official CDN"> 开放电台数据库 · 音频流由各电台官方 CDN 直供</span><br>
+    <span data-zh="本站为纯静态页面，不存储、不转播任何音频内容，版权归各广播机构所有。" data-en="This site is purely static: it stores and relays no audio. All rights remain with the broadcasters.">本站为纯静态页面，不存储、不转播任何音频内容，版权归各广播机构所有。</span>
   </div>
 </section>
 
@@ -276,8 +321,8 @@
 <section class="view" id="view-list" hidden>
   <div class="list-bar">
     <div class="list-bar-inner">
-      <button class="btn-back" id="btnBack" type="button">⬅ 返回分类</button>
-      <h2 class="list-title" id="listTitle">全部电台</h2>
+      <button class="btn-back" id="btnBack" type="button" data-zh="⬅ 返回分类" data-en="⬅ Categories">⬅ 返回分类</button>
+      <h2 class="list-title" id="listTitle" data-zh="全部电台" data-en="All stations">全部电台</h2>
       <span class="list-count" id="listCount"></span>
     </div>
   </div>
@@ -292,13 +337,13 @@
 <div class="player" id="player">
   <div class="p-art" id="pArt">♪</div>
   <div class="p-info">
-    <div class="p-name" id="pName">未选择电台</div>
-    <div class="p-sub" id="pSub">点击任意电台开始收听</div>
+    <div class="p-name" id="pName" data-zh="未选择电台" data-en="No station selected">未选择电台</div>
+    <div class="p-sub" id="pSub" data-zh="点击任意电台开始收听" data-en="Tap any station to start listening">点击任意电台开始收听</div>
   </div>
   <div class="p-ctrls">
-    <button class="p-btn ghost" id="pRetry" type="button" title="重新连接">↻</button>
-    <button class="p-btn main" id="pToggle" type="button" title="播放/暂停"></button>
-    <button class="p-btn ghost" id="pClose" type="button" title="关闭">✕</button>
+    <button class="p-btn ghost" id="pRetry" type="button" data-zh-title="重新连接" data-en-title="Reconnect">↻</button>
+    <button class="p-btn main" id="pToggle" type="button" data-zh-title="播放/暂停" data-en-title="Play / pause"></button>
+    <button class="p-btn ghost" id="pClose" type="button" data-zh-title="关闭" data-en-title="Close">✕</button>
   </div>
   <div class="p-vol">
     <span class="vol-ico" id="volIco">🔈</span>
@@ -316,6 +361,124 @@
   var $ = function (id) { return document.getElementById(id); };
   var ICON_PLAY  = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13c0 .8.9 1.3 1.6.9l10.2-6.5c.6-.4.6-1.4 0-1.8L9.6 4.6C8.9 4.2 8 4.7 8 5.5z"/></svg>';
   var ICON_PAUSE = '<svg viewBox="0 0 24 24" fill="currentColor"><rect x="6.5" y="5" width="4" height="14" rx="1.4"/><rect x="13.5" y="5" width="4" height="14" rx="1.4"/></svg>';
+
+  /* =====================================================================
+     双语（中 / EN）
+     ===================================================================== */
+  var LKEY = "hy.lang";
+  var lang = "zh";
+  try { lang = localStorage.getItem(LKEY) || "zh"; } catch (e) {}
+
+  /* 中文标签 → 英文 */
+  var EN_LABEL = {
+    "维吾尔语":"Uyghur", "藏语":"Tibetan", "蒙古语":"Mongolian", "朝鲜语":"Korean",
+    "哈萨克语":"Kazakh", "柯尔克孜语":"Kyrgyz", "彝语":"Yi", "傣语":"Dai",
+    "壮语":"Zhuang", "苗瑶侗布依语":"Miao · Yao · Dong · Bouyei", "其他民族语言":"Other minority languages",
+    "民族综合":"Minority general", "民族地区":"Minority regions", "国家电台":"National",
+    "内蒙古":"Inner Mongolia", "新疆":"Xinjiang", "西藏":"Tibet", "云南":"Yunnan",
+    "四川甘孜阿坝":"Garzê · Ngawa, Sichuan", "青海":"Qinghai", "甘肃":"Gansu", "延边":"Yanbian",
+    "东北民族地区":"Northeast China", "贵州":"Guizhou", "广西":"Guangxi",
+    "湘鄂渝":"Hunan · Hubei · Chongqing", "海南":"Hainan"
+  };
+
+  function labelEn(zh) {
+    var s = String(zh || "");
+    var i = s.indexOf(" · ");
+    if (s.indexOf("民族地区 · ") === 0) {
+      return "Minority regions · " + (EN_LABEL[s.slice(8)] || s.slice(8));
+    }
+    return EN_LABEL[s] || s;
+  }
+
+  /* UI 文案 */
+  var UI = {
+    zh: {
+      titleHome: "华韵集 · 中国少数民族广播电台",
+      titleSuffix: " · 华韵集",
+      stations: " 个电台",
+      empty: "该分类暂时没有可用电台。<br>点击左上角「⬅ 返回分类」换个分类试试。",
+      dead: "已失效",
+      loading: "正在加载电台数据…",
+      connecting: "正在连接…",
+      live: "正在直播",
+      paused: "已暂停",
+      buffering: "缓冲中…",
+      fluctuate: "网络波动，正在重新缓冲…",
+      retryline: "连接中断，换线路重试…",
+      ended: "直播已结束",
+      resume: "继续播放…",
+      reconnecting: "重新连接…",
+      failed: "连接失败 · 可换台或点 ↻ 重试",
+      unavailable: "该直播源暂时不可用，请换个电台",
+      triedLines: "已尝试 N 条线路",
+      lineOf: "正在连接…（线路 A/B）",
+      noStation: "未选择电台",
+      tapAny: "点击任意电台开始收听",
+      noPick: "还没有选择电台",
+      netFail: "网络请求失败，已切换至精选电台",
+      autoplay: "浏览器拦截了自动播放，请再点一次",
+      ariaPlay: "播放 ",
+      ariaGroup: "语言 / Language"
+    },
+    en: {
+      titleHome: "China's Voices · Minority-Language Radio",
+      titleSuffix: " · China's Voices",
+      stations: " stations",
+      empty: "No stations available in this category yet.<br>Use “⬅ Categories” at the top left to try another.",
+      dead: "Offline",
+      loading: "Loading stations…",
+      connecting: "Connecting…",
+      live: "On air",
+      paused: "Paused",
+      buffering: "Buffering…",
+      fluctuate: "Network hiccup — rebuffering…",
+      retryline: "Connection dropped — trying another route…",
+      ended: "Broadcast ended",
+      resume: "Resuming…",
+      reconnecting: "Reconnecting…",
+      failed: "Connection failed · try another station or tap ↻",
+      unavailable: "This stream is unavailable — please pick another station",
+      triedLines: "Tried N routes",
+      lineOf: "Connecting… (route A/B)",
+      noStation: "No station selected",
+      tapAny: "Tap any station to start listening",
+      noPick: "No station selected yet",
+      netFail: "Network request failed — switched to featured stations",
+      autoplay: "Your browser blocked autoplay — please tap once more",
+      ariaPlay: "Play ",
+      ariaGroup: "Language / 语言"
+    }
+  };
+  function t(k) { return UI[lang][k]; }
+
+  /* 切换语言：刷新静态文案 + 重渲染当前视图 */
+  function applyLang(l) {
+    lang = (l === "zh") ? "zh" : "en";
+    try { localStorage.setItem(LKEY, lang); } catch (e) {}
+
+    var nodes = document.querySelectorAll("[data-zh][data-en]");
+    for (var i = 0; i < nodes.length; i++) {
+      var v = nodes[i].getAttribute("data-" + lang);
+      if (v != null) nodes[i].textContent = v;
+    }
+    var tnodes = document.querySelectorAll("[data-zh-title][data-en-title]");
+    for (var n = 0; n < tnodes.length; n++) {
+      var tv = tnodes[n].getAttribute("data-" + lang + "-title");
+      if (tv != null) tnodes[n].setAttribute("title", tv);
+    }
+    document.documentElement.lang = (lang === "zh") ? "zh-CN" : "en";
+
+    var btns = document.querySelectorAll("#lang button");
+    for (var j = 0; j < btns.length; j++) {
+      btns[j].classList.toggle("on", btns[j].getAttribute("data-lang") === lang);
+    }
+
+    /* 当前正在播的电台名/状态也跟着语言走 */
+    if (current) $("pName").textContent = current.name;
+    else $("pName").textContent = t("noStation");
+
+    if (ALL.length) applyRoute();
+  }
 
   /* =====================================================================
      兜底数据：写死在 JS 里的 7 个可用直播源（全部实测 HTTP 200）
@@ -342,18 +505,25 @@
      分类（主屏幕的大卡片）
      ===================================================================== */
   var CATS = [
-    { key:"all",       emoji:"🌏", label:"全部",     sub:"所有民族语言电台", match:function(){ return true; } },
-    { key:"uyghur",    emoji:"🌙", label:"维吾尔语", sub:"ئۇيغۇرچە",        match:function(s){ return s.cat === "uyghur"; } },
-    { key:"tibetan",   emoji:"🏔️", label:"藏语",     sub:"བོད་ཡིག",         match:function(s){ return s.cat === "tibetan"; } },
-    { key:"mongolian", emoji:"🌾", label:"蒙古语",   sub:"Монгол хэл",      match:function(s){ return s.cat === "mongolian"; } },
-    { key:"kazakh",    emoji:"🪶", label:"哈萨克语", sub:"Қазақ тілі",      match:function(s){ return s.cat === "kazakh"; } },
-    { key:"korean",    emoji:"🌱", label:"朝鲜语",   sub:"조선어",           match:function(s){ return s.cat === "korean"; } },
-    { key:"southwest", emoji:"🌿", label:"西南民族", sub:"彝·傣·壮·苗·滇黔桂",
+    { key:"all",       emoji:"🌏", label:"全部",     labelEn:"All",              sub:"所有民族语言电台", subEn:"Every minority-language station", match:function(){ return true; } },
+    { key:"uyghur",    emoji:"🌙", label:"维吾尔语", labelEn:"Uyghur",           sub:"ئۇيغۇرچە",        subEn:"ئۇيغۇرچە", match:function(s){ return s.cat === "uyghur"; } },
+    { key:"tibetan",   emoji:"🏔️", label:"藏语",     labelEn:"Tibetan",          sub:"བོད་ཡིག",         subEn:"བོད་ཡིག", match:function(s){ return s.cat === "tibetan"; } },
+    { key:"mongolian", emoji:"🌾", label:"蒙古语",   labelEn:"Mongolian",        sub:"Монгол хэл",      subEn:"Монгол хэл", match:function(s){ return s.cat === "mongolian"; } },
+    { key:"kazakh",    emoji:"🪶", label:"哈萨克语", labelEn:"Kazakh",           sub:"Қазақ тілі",      subEn:"Қазақ тілі", match:function(s){ return s.cat === "kazakh"; } },
+    { key:"korean",    emoji:"🌱", label:"朝鲜语",   labelEn:"Korean",           sub:"조선어",           subEn:"조선어", match:function(s){ return s.cat === "korean"; } },
+    { key:"southwest", emoji:"🌿", label:"西南民族", labelEn:"Southwest peoples", sub:"彝·傣·壮·苗·滇黔桂", subEn:"Yi · Dai · Zhuang · Miao · Yunnan–Guizhou–Guangxi",
       match:function(s){
         if (s.cat === "yi" || s.cat === "dai" || s.cat === "zhuang" || s.cat === "miao") return true;
         return /云南|贵州|广西|四川甘孜阿坝|湘鄂渝/.test(s.catLabel || "");
       } }
   ];
+
+  /* 分类显示名（按语言） */
+  function catName(c) { return lang === "zh" ? c.label : (c.labelEn || labelEn(c.label)); }
+  function catSub(c)  { return lang === "zh" ? c.sub   : (c.subEn   || c.sub); }
+
+  /* 站点卡片上的分类标签 */
+  function catLabelOf(s) { return lang === "zh" ? s.catLabel : labelEn(s.catLabel); }
 
   /* =====================================================================
      实时数据源（仅在同域数据取不到时才用）
@@ -559,7 +729,7 @@
      视图切换（单页路由）
      ===================================================================== */
   function showLoading(text) {
-    if (text) $("loadingText").textContent = text;
+    $("loadingText").textContent = text || t("loading");
     $("loading").classList.remove("hide");
   }
   function hideLoading() { $("loading").classList.add("hide"); }
@@ -567,7 +737,7 @@
   function renderHome() {
     $("view-home").hidden = false;
     $("view-list").hidden = true;
-    document.title = "华韵集 · 中国少数民族广播电台";
+    document.title = t("titleHome");
 
     var box = $("catGrid");
     box.innerHTML = "";
@@ -585,15 +755,15 @@
 
       var lb = document.createElement("span");
       lb.className = "cat-label";
-      lb.textContent = c.label;
+      lb.textContent = catName(c);
 
       var sb = document.createElement("span");
       sb.className = "cat-sub";
-      sb.textContent = c.sub;
+      sb.textContent = catSub(c);
 
       var ct = document.createElement("span");
       ct.className = "cat-count";
-      ct.textContent = n + " 个电台";
+      ct.textContent = n + t("stations");
 
       el.appendChild(em); el.appendChild(lb); el.appendChild(sb); el.appendChild(ct);
       el.addEventListener("click", function () { location.hash = "#/c/" + c.key; });
@@ -610,9 +780,9 @@
 
     $("view-home").hidden = true;
     $("view-list").hidden = false;
-    document.title = cat.label + " · 华韵集";
-    $("listTitle").textContent = cat.label;
-    $("listCount").textContent = list.length + " 个电台";
+    document.title = catName(cat) + t("titleSuffix");
+    $("listTitle").textContent = catName(cat);
+    $("listCount").textContent = list.length + t("stations");
 
     var box = $("stationGrid");
     box.innerHTML = "";
@@ -620,7 +790,7 @@
     if (!list.length) {
       var d = document.createElement("div");
       d.className = "empty";
-      d.innerHTML = "该分类暂时没有可用电台。<br>点击左上角「⬅ 返回分类」换个分类试试。";
+      d.innerHTML = t("empty");
       box.appendChild(d);
       syncCards();
       return;
@@ -656,15 +826,15 @@
     nm.textContent = s.name;
     var ct = document.createElement("div");
     ct.className = "s-cat";
-    ct.textContent = s.catLabel;
+    ct.textContent = catLabelOf(s);
     head.appendChild(nm); head.appendChild(ct);
 
     var tags = document.createElement("div");
     tags.className = "s-tags";
-    (s.tags || []).forEach(function (t) {
+    (s.tags || []).forEach(function (tg) {
       var el = document.createElement("span");
       el.className = "s-tag";
-      el.textContent = t;
+      el.textContent = tg;
       tags.appendChild(el);
     });
 
@@ -672,7 +842,7 @@
       card.classList.add("is-dead");
       var dt = document.createElement("span");
       dt.className = "s-tag dead";
-      dt.textContent = "已失效";
+      dt.textContent = t("dead");
       tags.appendChild(dt);
     }
 
@@ -683,14 +853,14 @@
     var bits = [];
     if (s.codec && s.codec !== "UNKNOWN") bits.push(s.codec);
     if (s.bitrate) bits.push(s.bitrate + " kbps");
-    bits.push(isHls(s.url) ? "HLS" : "直播");
+    bits.push(isHls(s.url) ? "HLS" : (lang === "zh" ? "直播" : "Live"));
     meta.textContent = bits.join(" · ");
 
     var btn = document.createElement("button");
     btn.type = "button";
     btn.className = "s-play";
     btn.innerHTML = ICON_PLAY;
-    btn.setAttribute("aria-label", "播放 " + s.name);
+    btn.setAttribute("aria-label", t("ariaPlay") + s.name);
 
     foot.appendChild(meta); foot.appendChild(btn);
     card.appendChild(head);
@@ -768,18 +938,18 @@
   }
 
   function fail(extra) {
-    toast("该直播源暂时不可用，请换个电台" + (extra ? "（" + extra + "）" : ""));
-    updatePlayer("error", "连接失败 · 可换台或点 ↻ 重试");
+    toast(t("unavailable") + (extra ? "（" + extra + "）" : ""));
+    updatePlayer("error", t("failed"));
   }
 
   function loadCandidate() {
     if (!current) return;
-    if (candIdx >= candidates.length) { fail("已尝试 " + candidates.length + " 条线路"); return; }
+    if (candIdx >= candidates.length) { fail(t("triedLines").replace("N", candidates.length)); return; }
 
     var cand = candidates[candIdx++];
     var url = cand.url;
     destroyHls();
-    updatePlayer("loading", "正在连接…（线路 " + candIdx + "/" + candidates.length + "）");
+    updatePlayer("loading", t("lineOf").replace("A", candIdx).replace("B", candidates.length));
 
     var needsHls = isHls(url);
 
@@ -820,7 +990,7 @@
     var p = audio.play();
     if (p && p.catch) {
       p.catch(function (err) {
-        if (err && err.name === "NotAllowedError") fail("浏览器拦截了自动播放，请再点一次");
+        if (err && err.name === "NotAllowedError") fail(t("autoplay"));
         else loadCandidate();
       });
     }
@@ -834,13 +1004,13 @@
     retried = false;
     $("pName").textContent = item.name;
     $("pName").title = item.name;
-    updatePlayer("loading", "正在连接…");
+    updatePlayer("loading", t("connecting"));
     loadCandidate();
   }
 
   function toggleStation(item) {
     if (current && current.id === item.id && !$("player").classList.contains("is-error")) {
-      if (audio.paused) { updatePlayer("loading", "继续播放…"); play(); }
+      if (audio.paused) { updatePlayer("loading", t("resume")); play(); }
       else audio.pause();
       return;
     }
@@ -852,37 +1022,37 @@
      ===================================================================== */
   audio.addEventListener("playing", function () {
     retried = false;
-    updatePlayer("playing", "正在直播" + (current && current.catLabel ? " · " + current.catLabel : ""));
+    updatePlayer("playing", t("live") + (current && current.catLabel ? " · " + catLabelOf(current) : ""));
   });
   audio.addEventListener("pause", function () {
     if ($("player").classList.contains("is-error")) return;
-    updatePlayer("idle", "已暂停");
+    updatePlayer("idle", t("paused"));
   });
-  audio.addEventListener("waiting", function () { if (current) updatePlayer("loading", "缓冲中…"); });
-  audio.addEventListener("stalled", function () { if (current) updatePlayer("loading", "网络波动，正在重新缓冲…"); });
+  audio.addEventListener("waiting", function () { if (current) updatePlayer("loading", t("buffering")); });
+  audio.addEventListener("stalled", function () { if (current) updatePlayer("loading", t("fluctuate")); });
   audio.addEventListener("error", function () {
     if (!current) return;
-    if (!retried) { retried = true; updatePlayer("loading", "连接中断，换线路重试…"); }
+    if (!retried) { retried = true; updatePlayer("loading", t("retryline")); }
     loadCandidate();
   });
-  audio.addEventListener("ended", function () { updatePlayer("idle", "直播已结束"); });
+  audio.addEventListener("ended", function () { updatePlayer("idle", t("ended")); });
 
   $("pToggle").addEventListener("click", function () {
     if (!current) return;
-    if (audio.paused) { updatePlayer("loading", "继续播放…"); play(); }
+    if (audio.paused) { updatePlayer("loading", t("resume")); play(); }
     else audio.pause();
   });
   $("pRetry").addEventListener("click", function () {
-    if (!current) { toast("还没有选择电台"); return; }
+    if (!current) { toast(t("noPick")); return; }
     candIdx = 0; retried = false; hardStop();
-    updatePlayer("loading", "重新连接…");
+    updatePlayer("loading", t("reconnecting"));
     loadCandidate();
   });
   $("pClose").addEventListener("click", function () {
     hardStop();
     current = null;
     $("player").classList.remove("up");
-    $("pName").textContent = "未选择电台";
+    $("pName").textContent = t("noStation");
     syncCards();
   });
 
@@ -915,6 +1085,14 @@
   /* 返回分类 */
   $("btnBack").addEventListener("click", function () { location.hash = "#/home"; });
   window.addEventListener("hashchange", applyRoute);
+
+  /* 语言按钮 */
+  var langBtns = document.querySelectorAll("#lang button");
+  for (var li = 0; li < langBtns.length; li++) {
+    langBtns[li].addEventListener("click", function () {
+      applyLang(this.getAttribute("data-lang"));
+    });
+  }
 
   /* 键盘：空格播放/暂停 */
   document.addEventListener("keydown", function (e) {
@@ -968,8 +1146,8 @@
     hideLoading();
 
     if (usedFallback) {
-      setNotice("网络请求失败，已切换至精选电台");
-      toast("网络请求失败，已切换至精选电台", 5000);
+      setNotice(t("netFail"));
+      toast(t("netFail"), 5000);
     }
 
     applyRoute();
@@ -981,10 +1159,13 @@
       ALL = FALLBACK.slice();
       MODE = "fallback";
       hideLoading();
-      setNotice("网络请求失败，已切换至精选电台");
+      setNotice(t("netFail"));
       applyRoute();
     });
   }
+
+  /* 首屏先把语言应用上 */
+  applyLang(lang);
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", bootSafe);
   else bootSafe();
